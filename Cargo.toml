@@ -1,5 +1,5 @@
 [package]
-name = "BenfordsLaw"
+name = "benfords_law_checker"
 version = "0.1.0"
 authors = ["ASzwarc <szwarc.adam@gmail.com>"]
 edition = "2018"
