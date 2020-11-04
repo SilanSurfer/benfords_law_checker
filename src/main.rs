@@ -1,13 +1,24 @@
 use csv::Reader;
 use std::error::Error;
-use log::{info, trace};
+use log::{info, trace, warn, error};
 
 fn read_file(filename: &str) -> Result <(), Box<dyn Error>> {
     info!("Reading from file {}", filename);
     let mut reader = Reader::from_path(filename)?;
     for result in reader.records() {
-        let line = result?;
-        trace!("{:?}", line);
+        match result {
+            Ok(record) => {
+                if let Some(population) = record.get(1) {
+                    trace!("Val: {}", population);
+                } else {
+                    warn!("No population value!");
+                }
+            }
+            Err(err) => {
+                error!("Error while reading record!");
+                return Err(Box::new(err))
+            }
+        }
     }
     Ok(())
 }
