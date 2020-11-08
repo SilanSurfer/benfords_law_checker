@@ -2,11 +2,10 @@ use csv::Reader;
 use log::{error, info, trace, warn};
 use std::collections::HashMap;
 use std::error::Error;
+use std::fs::File;
 
-fn read_file(filename: &str) -> Result<(), Box<dyn Error>> {
-    info!("Reading from file {}", filename);
+fn get_freq_map(reader: &mut Reader<File>) -> Result<HashMap<char, u64>, Box<dyn Error>> {
     let mut digit_freq_map = HashMap::new();
-    let mut reader = Reader::from_path(filename)?;
     for result in reader.records() {
         match result {
             Ok(record) => {
@@ -32,7 +31,13 @@ fn read_file(filename: &str) -> Result<(), Box<dyn Error>> {
             }
         }
     }
-    Ok(())
+    Ok(digit_freq_map)
+}
+
+fn read_file(filename: &str) -> Result<Reader<File>, Box<dyn Error>> {
+    info!("Reading from file {}", filename);
+    let reader = Reader::from_path(filename)?;
+    Ok(reader)
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -40,6 +45,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     env_logger::init();
 
     let filename = String::from("population_by_country_2020.csv");
-    read_file(&filename)?;
+    let mut reader = read_file(&filename)?;
+    get_freq_map(&mut reader)?;
     Ok(())
 }
