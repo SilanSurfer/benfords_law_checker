@@ -15,11 +15,11 @@ fn get_freq_map(reader: &mut Reader<File>) -> Result<HashMap<char, u64>, Box<dyn
                         .chars()
                         .next()
                         .filter(char::is_ascii_digit)
-                        .and_then(|x| {
+                        .map(|x| {
                             let freq = digit_freq_map.entry(x).or_insert(1);
                             *freq += 1;
                             trace!("{} == {:?}", x, *freq);
-                            Some(*freq)
+                            *freq
                         });
                 } else {
                     warn!("No population value!");
