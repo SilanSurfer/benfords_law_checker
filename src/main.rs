@@ -1,5 +1,5 @@
 use csv::Reader;
-use log::{error, info, trace, warn};
+use log::{error, info, trace};
 use std::collections::HashMap;
 use std::error::Error;
 use std::fs::File;
@@ -9,21 +9,13 @@ fn get_freq_map(reader: &mut Reader<File>) -> Result<HashMap<char, u64>, Box<dyn
     for result in reader.records() {
         match result {
             Ok(record) => {
-                if let Some(population) = record.get(1) {
-                    trace!("Val: {}", population);
-                    population
-                        .chars()
-                        .next()
-                        .filter(char::is_ascii_digit)
+                get_first_digit_from(&record)
                         .map(|x| {
                             let freq = digit_freq_map.entry(x).or_insert(1);
                             *freq += 1;
                             trace!("{} == {:?}", x, *freq);
                             *freq
                         });
-                } else {
-                    warn!("No population value!");
-                }
             }
             Err(err) => {
                 error!("Error while reading record!");
@@ -32,6 +24,15 @@ fn get_freq_map(reader: &mut Reader<File>) -> Result<HashMap<char, u64>, Box<dyn
         }
     }
     Ok(digit_freq_map)
+}
+
+fn get_first_digit_from(record: &csv::StringRecord) -> Option<char> {
+    match record.get(1) {
+        Some(val) => {
+            trace!("Parsing value: {}", val);
+            val.chars().next().filter(|c| c.is_ascii_digit() && *c != '0')},
+        None => None,
+    }
 }
 
 fn read_file(filename: &str) -> Result<Reader<File>, Box<dyn Error>> {
