@@ -9,13 +9,7 @@ fn get_freq_map(reader: &mut Reader<File>) -> Result<HashMap<char, u64>, Box<dyn
     for result in reader.records() {
         match result {
             Ok(record) => {
-                get_first_digit_from(&record)
-                        .map(|x| {
-                            let freq = digit_freq_map.entry(x).or_insert(1);
-                            *freq += 1;
-                            trace!("{} == {:?}", x, *freq);
-                            *freq
-                        });
+                get_first_digit_from(&record).map(|x| update_freq_in_map(x, &mut digit_freq_map));
             }
             Err(err) => {
                 error!("Error while reading record!");
@@ -24,6 +18,13 @@ fn get_freq_map(reader: &mut Reader<File>) -> Result<HashMap<char, u64>, Box<dyn
         }
     }
     Ok(digit_freq_map)
+}
+
+fn update_freq_in_map(digit: char, hash_map: &mut HashMap<char, u64>) -> u64 {
+    let freq = hash_map.entry(digit).or_insert(1);
+    *freq += 1;
+    trace!("{} == {:?}", digit, *freq);
+    *freq
 }
 
 fn get_first_digit_from(record: &csv::StringRecord) -> Option<char> {
