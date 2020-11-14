@@ -47,6 +47,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let filename = String::from("population_by_country_2020.csv");
     let mut reader = read_file(&filename)?;
-    get_freq_map(&mut reader)?;
+    let freq_map = get_freq_map(&mut reader)?;
+    info!("Frequency map:\n{:?}", freq_map);
     Ok(())
 }
