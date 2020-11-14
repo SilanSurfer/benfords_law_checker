@@ -31,7 +31,10 @@ fn get_first_digit_from(record: &csv::StringRecord) -> Option<char> {
     match record.get(1) {
         Some(val) => {
             trace!("Parsing value: {}", val);
-            val.chars().next().filter(|c| c.is_ascii_digit() && *c != '0')},
+            val.chars()
+                .next()
+                .filter(|c| c.is_ascii_digit() && *c != '0')
+        }
         None => None,
     }
 }
