@@ -44,3 +44,33 @@ fn get_first_digit_from(record: &csv::StringRecord) -> Option<char> {
         None => None,
     }
 }
+
+#[cfg(test)]
+mod tests {
+    mod get_first_digit_from {
+        use crate::get_first_digit_from;
+        use csv::StringRecord;
+
+        #[test]
+        fn record_ok() {
+            let record = StringRecord::from(vec!["test", "1243"]);
+            assert_eq!(Some('1'), get_first_digit_from(&record));
+        }
+        #[test]
+        fn record_contains_zero_as_first_digit() {
+            let record = StringRecord::from(vec!["test", "0243"]);
+            assert_eq!(None, get_first_digit_from(&record));
+        }
+        #[test]
+        fn record_contains_not_ascii_digit_at_first_plae() {
+            let record = StringRecord::from(vec!["test", "q243"]);
+            assert_eq!(None, get_first_digit_from(&record));
+        }
+        #[test]
+        fn record_contains_only_one_element() {
+            let record = StringRecord::from(vec!["123"]);
+            assert_eq!(None, get_first_digit_from(&record));
+        }
+
+    }
+}
