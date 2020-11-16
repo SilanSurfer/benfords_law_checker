@@ -71,7 +71,6 @@ mod tests {
             let record = StringRecord::from(vec!["123"]);
             assert_eq!(None, get_first_digit_from(&record));
         }
-
     }
 
     mod update_freq_in_map {
