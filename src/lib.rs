@@ -27,7 +27,7 @@ pub fn get_freq_map(reader: &mut Reader<File>) -> Result<HashMap<char, u64>, Box
 }
 
 fn update_freq_in_map(digit: char, hash_map: &mut HashMap<char, u64>) -> u64 {
-    let freq = hash_map.entry(digit).or_insert(1);
+    let freq = hash_map.entry(digit).or_insert(0);
     *freq += 1;
     trace!("{} == {:?}", digit, *freq);
     *freq
@@ -72,5 +72,26 @@ mod tests {
             assert_eq!(None, get_first_digit_from(&record));
         }
 
+    }
+
+    mod update_freq_in_map {
+        use crate::update_freq_in_map;
+        use std::collections::HashMap;
+
+        #[test]
+        fn key_doesnt_exist_in_map() {
+            let mut digit_freq_map = HashMap::new();
+            assert_eq!(1, update_freq_in_map('2', &mut digit_freq_map));
+            assert_eq!(true, digit_freq_map.contains_key(&'2'));
+            assert_eq!(Some(&1), digit_freq_map.get(&'2'));
+        }
+        #[test]
+        fn key_exists_in_map() {
+            let mut digit_freq_map = HashMap::new();
+            digit_freq_map.insert('2', 1);
+            assert_eq!(2, update_freq_in_map('2', &mut digit_freq_map));
+            assert_eq!(true, digit_freq_map.contains_key(&'2'));
+            assert_eq!(Some(&2), digit_freq_map.get(&'2'));
+        }
     }
 }
