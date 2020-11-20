@@ -1,4 +1,5 @@
 use std::error::Error;
+use log::info;
 
 use benfords_law_checker::{display_digits_frequencies, get_occurence_map, read_file};
 

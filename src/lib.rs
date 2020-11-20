@@ -12,6 +12,7 @@ pub fn read_file(filename: &str) -> Result<Reader<File>, Box<dyn Error>> {
 }
 
 pub fn get_occurence_map(reader: &mut Reader<File>) -> Result<HashMap<char, u64>, Box<dyn Error>> {
+    info!("Counting digit occurences");
     let mut digit_freq_map = HashMap::new();
     for result in reader.records() {
         match result {
