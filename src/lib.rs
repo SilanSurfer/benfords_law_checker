@@ -105,4 +105,26 @@ mod tests {
             assert_eq!(Some(&2), digit_freq_map.get(&'2'));
         }
     }
+
+    mod display_digits_frequencies {
+        use crate::display_digits_frequencies;
+        use std::collections::HashMap;
+
+        #[test]
+        fn display_empty_result() {
+            let digit_occurence_map = HashMap::new();
+            assert_eq!("{}", display_digits_frequencies(digit_occurence_map));
+        }
+
+        #[test]
+        fn display_normal_result() {
+            let mut digit_occurence_map = HashMap::new();
+            digit_occurence_map.insert('1', 5);
+            digit_occurence_map.insert('2', 10);
+            assert_eq!(
+                "{'1': 0.33, '2': 0.67}",
+                display_digits_frequencies(digit_occurence_map)
+            );
+        }
+    }
 }
