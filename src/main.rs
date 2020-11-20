@@ -9,6 +9,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     let filename = String::from("population_by_country_2020.csv");
     let mut reader = read_file(&filename)?;
     let occurence_map = get_occurence_map(&mut reader)?;
-    display_digits_frequencies(occurence_map);
+    info!("Digit frequencies: {}", display_digits_frequencies(occurence_map));
     Ok(())
 }

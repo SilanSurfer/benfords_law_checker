@@ -28,13 +28,13 @@ pub fn get_occurence_map(reader: &mut Reader<File>) -> Result<HashMap<char, u64>
     Ok(digit_freq_map)
 }
 
-pub fn display_digits_frequencies(occurence_map: HashMap<char, u64>) {
+pub fn display_digits_frequencies(occurence_map: HashMap<char, u64>) -> String {
     let total: u64 = occurence_map.values().sum();
     let freq_result: BTreeMap<char, f64> = occurence_map
         .into_iter()
         .map(|(digit, val)| (digit, val as f64 / total as f64))
         .collect();
-    info!("Frequency map:\n{:.2?}", freq_result);
+    format!("{:.2?}", freq_result)
 }
 
 fn get_first_digit_from(record: &csv::StringRecord) -> Option<char> {
