@@ -1,7 +1,15 @@
 use log::info;
 use std::error::Error;
+use structopt::StructOpt;
 
 use benfords_law_checker::{display_digits_frequencies, get_occurence_map, read_file};
+
+#[derive(StructOpt)]
+#[structopt(name = "cli args", about = "Structure for keeping all CLI arguments")]
+struct CliArgs {
+    /// The path to the file to read
+    input_file_path: String,
+}
 
 fn configure_logger() {
     use chrono::Local;
@@ -42,10 +50,10 @@ fn configure_logger() {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
+    let args = CliArgs::from_args();
     configure_logger();
 
-    let filename = String::from("population_by_country_2020.csv");
-    let mut reader = read_file(&filename)?;
+    let mut reader = read_file(&args.input_file_path)?;
     let occurence_map = get_occurence_map(&mut reader)?;
     info!(
         "Digit frequencies: {}",
