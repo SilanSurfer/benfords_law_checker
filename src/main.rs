@@ -5,7 +5,7 @@ use structopt::StructOpt;
 use benfords_law_checker::{display_digits_frequencies, get_occurence_map, read_file};
 
 #[derive(StructOpt)]
-#[structopt(name = "cli args", about = "Structure for keeping all CLI arguments")]
+#[structopt(name = "Benford's Law Checker", about = "Application checks if data follow Benford's Law")]
 struct CliArgs {
     /// The path to the file to read
     input_file_path: String,
