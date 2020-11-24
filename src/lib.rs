@@ -1,5 +1,5 @@
 use csv::Reader;
-use log::{error, info, trace};
+use log::{debug, error, info, trace};
 use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::error::Error;
@@ -12,7 +12,7 @@ pub fn read_file(filename: &str) -> Result<Reader<File>, Box<dyn Error>> {
 }
 
 pub fn get_occurence_map(reader: &mut Reader<File>) -> Result<HashMap<char, u64>, Box<dyn Error>> {
-    info!("Counting digit occurences");
+    debug!("Counting digit occurences");
     let mut digit_freq_map = HashMap::new();
     for result in reader.records() {
         match result {
@@ -30,6 +30,7 @@ pub fn get_occurence_map(reader: &mut Reader<File>) -> Result<HashMap<char, u64>
 }
 
 pub fn display_digits_frequencies(occurence_map: HashMap<char, u64>) -> String {
+    debug!("Displaying digit frequencies");
     let total: u64 = occurence_map.values().sum();
     let freq_result: BTreeMap<char, f64> = occurence_map
         .into_iter()
