@@ -9,14 +9,25 @@ use benfords_law_checker::{display_digits_frequencies, get_occurence_map, read_f
 struct CliArgs {
     /// The path to the file to read
     input_file_path: String,
+    /// Verbosity level
+    /// -v for debug,
+    /// -vv for trace
+    #[structopt(short = "v", parse(from_occurrences))]
+    verbose: u8
 }
 
-fn configure_logger() {
+fn configure_logger(verbose: u8) {
     use chrono::Local;
     use env_logger::fmt::Color;
     use env_logger::Builder;
     use log::LevelFilter;
     use std::io::Write;
+
+    let level_filter = match verbose {
+        1 => LevelFilter::Debug,
+        2 => LevelFilter::Trace,
+        _ => LevelFilter::Info,
+    };
 
     let mut builder = Builder::from_default_env();
     builder
@@ -45,13 +56,13 @@ fn configure_logger() {
                 args_style.value(record.args())
             )
         })
-        .filter(None, LevelFilter::Info)
+        .filter(None, level_filter)
         .init();
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
     let args = CliArgs::from_args();
-    configure_logger();
+    configure_logger(args.verbose);
 
     let mut reader = read_file(&args.input_file_path)?;
     let occurence_map = get_occurence_map(&mut reader)?;
