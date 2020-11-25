@@ -1,5 +1,5 @@
 use csv::Reader;
-use log::{error, info, trace};
+use log::{debug, error, info, trace};
 use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::error::Error;
@@ -11,8 +11,11 @@ pub fn read_file(filename: &str) -> Result<Reader<File>, Box<dyn Error>> {
     Ok(reader)
 }
 
-pub fn get_occurence_map(reader: &mut Reader<File>) -> Result<HashMap<char, u64>, Box<dyn Error>> {
-    info!("Counting digit occurences");
+pub fn get_occurence_map(
+    reader: &mut Reader<File>,
+    _input_header: Option<String>,
+) -> Result<HashMap<char, u64>, Box<dyn Error>> {
+    debug!("Counting digit occurences");
     let mut digit_freq_map = HashMap::new();
     for result in reader.records() {
         match result {
@@ -29,7 +32,8 @@ pub fn get_occurence_map(reader: &mut Reader<File>) -> Result<HashMap<char, u64>
     Ok(digit_freq_map)
 }
 
-pub fn display_digits_frequencies(occurence_map: HashMap<char, u64>) -> String {
+pub fn display_digits_frequencies(occurence_map: HashMap<char, u64>, _graph: bool) -> String {
+    debug!("Displaying digit frequencies");
     let total: u64 = occurence_map.values().sum();
     let freq_result: BTreeMap<char, f64> = occurence_map
         .into_iter()
@@ -113,7 +117,7 @@ mod tests {
         #[test]
         fn display_empty_result() {
             let digit_occurence_map = HashMap::new();
-            assert_eq!("{}", display_digits_frequencies(digit_occurence_map));
+            assert_eq!("{}", display_digits_frequencies(digit_occurence_map, false));
         }
 
         #[test]
@@ -123,7 +127,7 @@ mod tests {
             digit_occurence_map.insert('2', 10);
             assert_eq!(
                 "{'1': 0.33, '2': 0.67}",
-                display_digits_frequencies(digit_occurence_map)
+                display_digits_frequencies(digit_occurence_map, true)
             );
         }
     }
