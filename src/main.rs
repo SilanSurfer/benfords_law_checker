@@ -20,6 +20,9 @@ struct CliArgs {
     /// -vv for trace
     #[structopt(short = "v", parse(from_occurrences))]
     verbose: u8,
+    /// Display graph with presentation of the results.
+    #[structopt(short, long)]
+    graph: bool,
 }
 
 fn configure_logger(verbose: u8) {
@@ -74,7 +77,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let occurence_map = get_occurence_map(&mut reader, args.input_header)?;
     info!(
         "Digit frequencies: {}",
-        display_digits_frequencies(occurence_map)
+        display_digits_frequencies(occurence_map, args.graph)
     );
     Ok(())
 }

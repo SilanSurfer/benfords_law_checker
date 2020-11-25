@@ -32,7 +32,7 @@ pub fn get_occurence_map(
     Ok(digit_freq_map)
 }
 
-pub fn display_digits_frequencies(occurence_map: HashMap<char, u64>) -> String {
+pub fn display_digits_frequencies(occurence_map: HashMap<char, u64>, _graph: bool) -> String {
     debug!("Displaying digit frequencies");
     let total: u64 = occurence_map.values().sum();
     let freq_result: BTreeMap<char, f64> = occurence_map
@@ -117,7 +117,7 @@ mod tests {
         #[test]
         fn display_empty_result() {
             let digit_occurence_map = HashMap::new();
-            assert_eq!("{}", display_digits_frequencies(digit_occurence_map));
+            assert_eq!("{}", display_digits_frequencies(digit_occurence_map, false));
         }
 
         #[test]
@@ -127,7 +127,7 @@ mod tests {
             digit_occurence_map.insert('2', 10);
             assert_eq!(
                 "{'1': 0.33, '2': 0.67}",
-                display_digits_frequencies(digit_occurence_map)
+                display_digits_frequencies(digit_occurence_map, true)
             );
         }
     }
