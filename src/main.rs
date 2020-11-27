@@ -4,6 +4,8 @@ use structopt::StructOpt;
 
 use benfords_law_checker::{display_digits_frequencies, get_occurence_map, read_file};
 
+mod logger;
+
 #[derive(StructOpt)]
 #[structopt(
     name = "Benford's Law Checker",
@@ -25,53 +27,9 @@ struct CliArgs {
     graph: bool,
 }
 
-fn configure_logger(verbose: u8) {
-    use chrono::Local;
-    use env_logger::fmt::Color;
-    use env_logger::Builder;
-    use log::LevelFilter;
-    use std::io::Write;
-
-    let level_filter = match verbose {
-        1 => LevelFilter::Debug,
-        2 => LevelFilter::Trace,
-        _ => LevelFilter::Info,
-    };
-
-    let mut builder = Builder::from_default_env();
-    builder
-        .format(|buf, record| {
-            let mut level_style = buf.style();
-            let mut args_style = buf.style();
-            match record.level() {
-                log::Level::Error => {
-                    level_style.set_color(Color::Red).set_bold(true);
-                    args_style.set_color(Color::Red);
-                }
-                log::Level::Warn => {
-                    level_style.set_color(Color::Yellow);
-                    args_style.set_color(Color::Red);
-                }
-                log::Level::Info => {
-                    level_style.set_color(Color::Green);
-                }
-                _ => {}
-            }
-            writeln!(
-                buf,
-                "{} [{}] - {}",
-                Local::now().format("%H:%M:%S"),
-                level_style.value(record.level()),
-                args_style.value(record.args())
-            )
-        })
-        .filter(None, level_filter)
-        .init();
-}
-
 fn main() -> Result<(), Box<dyn Error>> {
     let args = CliArgs::from_args();
-    configure_logger(args.verbose);
+    logger::configure_logger(args.verbose);
 
     let mut reader = read_file(&args.input_file_path)?;
     let occurence_map = get_occurence_map(&mut reader, args.input_header)?;
