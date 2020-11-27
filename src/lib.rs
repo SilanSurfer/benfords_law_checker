@@ -2,19 +2,19 @@ use csv::Reader;
 use log::{debug, error, info, trace};
 use std::collections::BTreeMap;
 use std::collections::HashMap;
-use std::error::Error;
 use std::fs::File;
 
-pub fn read_file(filename: &str) -> Result<Reader<File>, Box<dyn Error>> {
+mod error;
+
+pub fn read_file(filename: &str) -> Result<Reader<File>, error::CheckerError> {
     info!("Reading from file {}", filename);
-    let reader = Reader::from_path(filename)?;
-    Ok(reader)
+    Reader::from_path(filename).map_err(error::CheckerError::IoError)
 }
 
 pub fn get_occurence_map(
     reader: &mut Reader<File>,
     _input_header: Option<String>,
-) -> Result<HashMap<char, u64>, Box<dyn Error>> {
+) -> Result<HashMap<char, u64>, error::CheckerError> {
     debug!("Counting digit occurences");
     let mut digit_freq_map = HashMap::new();
     for result in reader.records() {
@@ -25,7 +25,7 @@ pub fn get_occurence_map(
             }
             Err(err) => {
                 error!("Error while reading record!");
-                return Err(Box::new(err));
+                return Err(error::CheckerError::CsvError(err));
             }
         }
     }
