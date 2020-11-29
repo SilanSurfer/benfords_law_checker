@@ -42,6 +42,21 @@ pub fn display_digits_frequencies(occurence_map: HashMap<char, u64>, _graph: boo
     format!("{:.2?}", freq_result)
 }
 
+fn get_header_index(
+    reader: &mut Reader<File>,
+    header_name: String,
+) -> Result<usize, error::CheckerError> {
+    let headers = reader.headers().map_err(error::CheckerError::CsvError)?;
+    if headers.is_empty() {
+        Err(error::CheckerError::NoHeaders)
+    } else {
+        headers
+            .iter()
+            .position(|x| x == header_name)
+            .ok_or(error::CheckerError::NoHeaderName(header_name))
+    }
+}
+
 fn get_first_digit_from(record: &csv::StringRecord) -> Option<char> {
     match record.get(1) {
         Some(val) => {
