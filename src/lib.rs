@@ -13,14 +13,18 @@ pub fn read_file(filename: &str) -> Result<Reader<File>, error::CheckerError> {
 
 pub fn get_occurence_map(
     reader: &mut Reader<File>,
-    _input_header: Option<String>,
+    input_header: Option<String>,
 ) -> Result<HashMap<char, u64>, error::CheckerError> {
     debug!("Counting digit occurences");
+    let mut header_index: usize = 1;
+    if let Some(name) = input_header {
+        header_index = get_header_index(reader, name)?;
+    }
     let mut digit_freq_map = HashMap::new();
     for result in reader.records() {
         match result {
             Ok(record) => {
-                get_first_digit_from(&record)
+                get_first_digit_from(&record, header_index)
                     .map(|x| update_occurence_in_map(x, &mut digit_freq_map));
             }
             Err(err) => {
@@ -42,8 +46,23 @@ pub fn display_digits_frequencies(occurence_map: HashMap<char, u64>, _graph: boo
     format!("{:.2?}", freq_result)
 }
 
-fn get_first_digit_from(record: &csv::StringRecord) -> Option<char> {
-    match record.get(1) {
+fn get_header_index(
+    reader: &mut Reader<File>,
+    header_name: String,
+) -> Result<usize, error::CheckerError> {
+    let headers = reader.headers().map_err(error::CheckerError::CsvError)?;
+    if headers.is_empty() {
+        Err(error::CheckerError::NoHeaders)
+    } else {
+        headers
+            .iter()
+            .position(|x| x == header_name)
+            .ok_or(error::CheckerError::NoHeaderName(header_name))
+    }
+}
+
+fn get_first_digit_from(record: &csv::StringRecord, index: usize) -> Option<char> {
+    match record.get(index) {
         Some(val) => {
             trace!("Parsing value: {}", val);
             val.chars()
@@ -70,22 +89,22 @@ mod tests {
         #[test]
         fn record_ok() {
             let record = StringRecord::from(vec!["test", "1243"]);
-            assert_eq!(Some('1'), get_first_digit_from(&record));
+            assert_eq!(Some('1'), get_first_digit_from(&record, 1));
         }
         #[test]
         fn record_contains_zero_as_first_digit() {
             let record = StringRecord::from(vec!["test", "0243"]);
-            assert_eq!(None, get_first_digit_from(&record));
+            assert_eq!(None, get_first_digit_from(&record, 1));
         }
         #[test]
         fn record_contains_not_ascii_digit_at_first_plae() {
             let record = StringRecord::from(vec!["test", "q243"]);
-            assert_eq!(None, get_first_digit_from(&record));
+            assert_eq!(None, get_first_digit_from(&record, 1));
         }
         #[test]
         fn record_contains_only_one_element() {
             let record = StringRecord::from(vec!["123"]);
-            assert_eq!(None, get_first_digit_from(&record));
+            assert_eq!(None, get_first_digit_from(&record, 1));
         }
     }
 
