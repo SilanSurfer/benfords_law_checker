@@ -21,7 +21,7 @@ pub fn get_occurence_map(
         header_index = get_header_index(reader, name)?;
     }
     let mut digit_freq_map = HashMap::new();
-    if reader.records().next().is_none()  {
+    if reader.records().next().is_none() {
         return Err(error::CheckerError::EmptySource);
     }
     for result in reader.records() {
