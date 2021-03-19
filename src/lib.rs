@@ -6,12 +6,27 @@ use std::fs::File;
 
 mod error;
 
-pub fn read_file(filename: &str) -> Result<Reader<File>, error::CheckerError> {
+pub fn run(
+    input_file: &str,
+    header: Option<String>,
+    render_graph: bool,
+) -> Result<(), error::CheckerError> {
+    let mut reader = read_file(input_file)?;
+    let occurence_map = get_occurence_map(&mut reader, header)?;
+    info!(
+        "Digit frequencies: {}",
+        display_digits_frequencies(occurence_map, render_graph)
+    );
+
+    Ok(())
+}
+
+fn read_file(filename: &str) -> Result<Reader<File>, error::CheckerError> {
     info!("Reading from file {}", filename);
     Reader::from_path(filename).map_err(error::CheckerError::IoError)
 }
 
-pub fn get_occurence_map(
+fn get_occurence_map(
     reader: &mut Reader<File>,
     input_header: Option<String>,
 ) -> Result<HashMap<char, u64>, error::CheckerError> {
@@ -39,7 +54,7 @@ pub fn get_occurence_map(
     Ok(digit_freq_map)
 }
 
-pub fn display_digits_frequencies(occurence_map: HashMap<char, u64>, _graph: bool) -> String {
+fn display_digits_frequencies(occurence_map: HashMap<char, u64>, _graph: bool) -> String {
     debug!("Displaying digit frequencies");
     let total: u64 = occurence_map.values().sum();
     let freq_result: BTreeMap<char, f64> = occurence_map
