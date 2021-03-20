@@ -23,7 +23,7 @@ fn file_is_empty() -> Result<(), Box<dyn std::error::Error>> {
     cmd.arg(file.path());
     cmd.assert()
         .failure()
-        .stderr(predicate::str::contains("File doesn't contain data"));
+        .stderr(predicate::str::contains("File doesn't contain any data"));
 
     Ok(())
 }
@@ -39,7 +39,7 @@ fn invalid_csv_file() -> Result<(), Box<dyn std::error::Error>> {
     cmd.arg(file.path());
     cmd.assert()
         .failure()
-        .stderr(predicate::str::contains("CSV Error"));
+        .stderr(predicate::str::contains("CSV error caused by"));
 
     Ok(())
 }
@@ -55,7 +55,7 @@ fn no_required_header() -> Result<(), Box<dyn std::error::Error>> {
     cmd.arg(file.path()).arg("-i header3");
     cmd.assert()
         .failure()
-        .stderr(predicate::str::contains("There is no header"));
+        .stderr(predicate::str::contains("Couldn't find required header"));
 
     Ok(())
 }
