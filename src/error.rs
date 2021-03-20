@@ -1,35 +1,15 @@
-use std::fmt;
+use thiserror::Error;
 
+#[derive(Error, Debug)]
 pub enum CheckerError {
+    #[error("File doesn't contain any data")]
     EmptySource,
+    #[error("There is no headers in file")]
     NoHeaders,
+    #[error("Couldn't find required header `{0}` in file")]
     NoHeaderName(String),
+    #[error("IO error caused by: `{0}`")]
     IoError(csv::Error),
-    CsvError(csv::Error),
-}
-
-impl std::error::Error for CheckerError {}
-
-impl fmt::Display for CheckerError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::EmptySource => write!(f, "File doesn't contain data"),
-            Self::NoHeaders => write!(f, "There is no headers in file"),
-            Self::NoHeaderName(name) => write!(f, "There is no header {} in file", name),
-            Self::IoError(e) => write!(f, "IO Error caused by: {}", e),
-            Self::CsvError(e) => write!(f, "CSV Error caused by: {}", e),
-        }
-    }
-}
-
-impl fmt::Debug for CheckerError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::EmptySource => write!(f, "File doesn't contain data"),
-            Self::NoHeaders => write!(f, "There is no headers in file"),
-            Self::NoHeaderName(name) => write!(f, "There is no header {} in file", name),
-            Self::IoError(e) => write!(f, "IO Error caused by: {}", e),
-            Self::CsvError(e) => write!(f, "CSV Error caused by: {}", e),
-        }
-    }
+    #[error("CSV error caused by: `{0}`")]
+    CsvError(#[from] csv::Error),
 }

@@ -6,19 +6,23 @@ use std::fs::File;
 
 mod error;
 
-pub fn run(
-    input_file: &str,
-    header: Option<String>,
-    render_graph: bool,
-) -> Result<(), error::CheckerError> {
-    let mut reader = read_file(input_file)?;
-    let occurence_map = get_occurence_map(&mut reader, header)?;
+pub fn run(input_file: &str, header: Option<String>, render_graph: bool) {
+    let mut reader = match read_file(input_file) {
+        Ok(reader) => reader,
+        Err(e) => {
+            panic!("Error: {}", e);
+        }
+    };
+    let occurence_map = match get_occurence_map(&mut reader, header) {
+        Ok(occ_map) => occ_map,
+        Err(e) => {
+            panic!("Error: {}", e);
+        }
+    };
     info!(
         "Digit frequencies: {}",
         display_digits_frequencies(occurence_map, render_graph)
     );
-
-    Ok(())
 }
 
 fn read_file(filename: &str) -> Result<Reader<File>, error::CheckerError> {
