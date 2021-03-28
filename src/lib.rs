@@ -21,9 +21,58 @@ pub fn run(input_file: &str, header: Option<String>, render_graph: bool) {
     };
     info!(
         "Digit frequencies: {}",
-        display_digits_frequencies(occurence_map, render_graph)
+        display_digits_frequencies(&occurence_map)
     );
+
+    if render_graph {
+        display_graph(occurence_map);
+    }
 }
+
+fn display_graph(occurence_map: HashMap<char, u64>) {
+    use plotters::prelude::*;
+
+    // TODO pass parameter for output filename
+    let graph_name = "test.png";
+
+    info!("Plotting diagram named {}", graph_name);
+
+    let root_area = BitMapBackend::new(graph_name, (600, 400))
+    .into_drawing_area();
+    // TODO better error handling
+    root_area.fill(&WHITE).unwrap();
+
+    let total: u64 = occurence_map.values().sum();
+    debug!("Occurence map:\n{:?}", &occurence_map);
+
+    let vals: Vec<u64> = occurence_map
+        .into_iter()
+        .map(|(_, val)| val)
+        .collect();
+
+    debug!("Total: {}", total);
+    debug!("Vals:\n{:?}", vals);
+
+    let mut ctx = ChartBuilder::on(&root_area)
+        .set_label_area_size(LabelAreaPosition::Left, 40)
+        .set_label_area_size(LabelAreaPosition::Bottom, 40)
+        .caption("Benford's Law", ("sans-serif", 40))
+        .build_cartesian_2d((0..9).into_segmented(), 0..total)
+        .unwrap();
+
+    ctx.configure_mesh().draw().unwrap();
+
+    ctx.draw_series((0..).zip(vals.iter()).map(|(x, y)| {
+        let x0 = SegmentValue::Exact(x);
+        let x1 = SegmentValue::Exact(x + 1);
+        let mut bar = Rectangle::new([(x0, 0), (x1, *y)], RED.filled());
+        bar.set_margin(0, 0, 5, 5);
+        bar
+    }))
+    .unwrap();
+
+}
+
 
 fn read_file(filename: &str) -> Result<Reader<File>, error::CheckerError> {
     info!("Reading from file {}", filename);
@@ -58,12 +107,12 @@ fn get_occurence_map(
     Ok(digit_freq_map)
 }
 
-fn display_digits_frequencies(occurence_map: HashMap<char, u64>, _graph: bool) -> String {
+fn display_digits_frequencies(occurence_map: &HashMap<char, u64>) -> String {
     debug!("Displaying digit frequencies");
     let total: u64 = occurence_map.values().sum();
     let freq_result: BTreeMap<char, f64> = occurence_map
         .into_iter()
-        .map(|(digit, val)| (digit, val as f64 / total as f64))
+        .map(|(digit, val)| (*digit, *val as f64 / total as f64))
         .collect();
     format!("{:.2?}", freq_result)
 }
@@ -158,7 +207,7 @@ mod tests {
         #[test]
         fn display_empty_result() {
             let digit_occurence_map = HashMap::new();
-            assert_eq!("{}", display_digits_frequencies(digit_occurence_map, false));
+            assert_eq!("{}", display_digits_frequencies(&digit_occurence_map));
         }
 
         #[test]
@@ -168,7 +217,7 @@ mod tests {
             digit_occurence_map.insert('2', 10);
             assert_eq!(
                 "{'1': 0.33, '2': 0.67}",
-                display_digits_frequencies(digit_occurence_map, true)
+                display_digits_frequencies(&digit_occurence_map)
             );
         }
     }
