@@ -37,32 +37,37 @@ fn display_graph(occurence_map: HashMap<char, u64>) {
 
     info!("Plotting diagram named {}", graph_name);
 
-    let root_area = BitMapBackend::new(graph_name, (600, 400))
-    .into_drawing_area();
+    let root_area = BitMapBackend::new(graph_name, (600, 400)).into_drawing_area();
     // TODO better error handling
     root_area.fill(&WHITE).unwrap();
 
-    let total: u64 = occurence_map.values().sum();
+    let max: u64 = occurence_map
+        .values()
+        .max()
+        .expect("It shouldn't fail if not empty")
+        .clone();
     debug!("Occurence map:\n{:?}", &occurence_map);
 
-    let vals: Vec<u64> = occurence_map
+    let sorted_vals = occurence_map
         .into_iter()
-        .map(|(_, val)| val)
-        .collect();
+        .collect::<BTreeMap<char, u64>>()
+        .values()
+        .cloned()
+        .collect::<Vec<u64>>();
 
-    debug!("Total: {}", total);
-    debug!("Vals:\n{:?}", vals);
+    debug!("Sorted vals:\n{:?}", sorted_vals);
 
     let mut ctx = ChartBuilder::on(&root_area)
         .set_label_area_size(LabelAreaPosition::Left, 40)
         .set_label_area_size(LabelAreaPosition::Bottom, 40)
         .caption("Benford's Law", ("sans-serif", 40))
-        .build_cartesian_2d((0..9).into_segmented(), 0..total)
+        // Added offset of 10, so that Y-axis looks nicer
+        .build_cartesian_2d((1..9).into_segmented(), 0..max + 10)
         .unwrap();
 
     ctx.configure_mesh().draw().unwrap();
 
-    ctx.draw_series((0..).zip(vals.iter()).map(|(x, y)| {
+    ctx.draw_series((1..).zip(sorted_vals.iter()).map(|(x, y)| {
         let x0 = SegmentValue::Exact(x);
         let x1 = SegmentValue::Exact(x + 1);
         let mut bar = Rectangle::new([(x0, 0), (x1, *y)], RED.filled());
@@ -70,9 +75,7 @@ fn display_graph(occurence_map: HashMap<char, u64>) {
         bar
     }))
     .unwrap();
-
 }
-
 
 fn read_file(filename: &str) -> Result<Reader<File>, error::CheckerError> {
     info!("Reading from file {}", filename);
