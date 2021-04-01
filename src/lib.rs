@@ -6,7 +6,7 @@ use std::fs::File;
 
 mod error;
 
-pub fn run(input_file: &str, header: Option<String>, render_graph: bool) {
+pub fn run(input_file: &str, header: Option<String>, render_graph: Option<String>) {
     let mut reader = match read_file(input_file) {
         Ok(reader) => reader,
         Err(e) => {
@@ -24,20 +24,20 @@ pub fn run(input_file: &str, header: Option<String>, render_graph: bool) {
         display_digits_frequencies(&occurence_map)
     );
 
-    if render_graph {
-        display_graph(occurence_map);
+    if render_graph.is_some() {
+        display_graph(
+            occurence_map,
+            render_graph.expect("We could safely assume here is some value"),
+        );
     }
 }
 
-fn display_graph(occurence_map: HashMap<char, u64>) {
+fn display_graph(occurence_map: HashMap<char, u64>, graph_name: String) {
     use plotters::prelude::*;
-
-    // TODO pass parameter for output filename
-    let graph_name = "test.png";
 
     info!("Plotting diagram named {}", graph_name);
 
-    let root_area = BitMapBackend::new(graph_name, (600, 400)).into_drawing_area();
+    let root_area = BitMapBackend::new(&graph_name, (600, 400)).into_drawing_area();
     // TODO better error handling
     root_area.fill(&WHITE).unwrap();
 
