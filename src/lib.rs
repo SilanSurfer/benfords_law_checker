@@ -41,11 +41,10 @@ fn display_graph(occurence_map: HashMap<char, u64>, graph_name: String) {
     // TODO better error handling
     root_area.fill(&WHITE).unwrap();
 
-    let max: u64 = occurence_map
+    let max: u64 = *occurence_map
         .values()
         .max()
-        .expect("It shouldn't fail if not empty")
-        .clone();
+        .expect("It shouldn't fail if not empty");
     debug!("Occurence map:\n{:?}", &occurence_map);
 
     let sorted_vals = occurence_map
@@ -114,7 +113,7 @@ fn display_digits_frequencies(occurence_map: &HashMap<char, u64>) -> String {
     debug!("Displaying digit frequencies");
     let total: u64 = occurence_map.values().sum();
     let freq_result: BTreeMap<char, f64> = occurence_map
-        .into_iter()
+        .iter()
         .map(|(digit, val)| (*digit, *val as f64 / total as f64))
         .collect();
     format!("{:.2?}", freq_result)
