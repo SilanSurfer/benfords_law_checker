@@ -1,4 +1,5 @@
 use csv::Reader;
+use error::CheckerError;
 use log::{debug, error, info, trace};
 use std::collections::BTreeMap;
 use std::collections::HashMap;
@@ -25,19 +26,26 @@ pub fn run(input_file: &str, header: Option<String>, render_graph: Option<String
     );
 
     if render_graph.is_some() {
-        display_graph(
+        if let Err(e) = display_graph(
             occurence_map,
             render_graph.expect("We could safely assume here is some value"),
-        );
+        ) {
+            panic!("Error: {}", e);
+        }
     }
 }
 
-fn display_graph(occurence_map: HashMap<char, u64>, graph_name: String) {
+fn display_graph(occurence_map: HashMap<char, u64>, graph_name: String) -> Result<(), error::CheckerError>{
     use plotters::prelude::*;
+    use std::path::Path;
 
-    info!("Plotting diagram named {}", graph_name);
+    let graph_name_path = Path::new(&graph_name);
+    if graph_name_path.extension().is_none() {
+        return Err(CheckerError::GraphOutputFileError);
+    }
+    info!("Saving plot in {}", &graph_name_path.display());
 
-    let root_area = BitMapBackend::new(&graph_name, (600, 400)).into_drawing_area();
+    let root_area = BitMapBackend::new(&graph_name_path, (600, 400)).into_drawing_area();
     // TODO better error handling
     root_area.fill(&WHITE).unwrap();
 
@@ -74,6 +82,8 @@ fn display_graph(occurence_map: HashMap<char, u64>, graph_name: String) {
         bar
     }))
     .unwrap();
+
+    Ok(())
 }
 
 fn read_file(filename: &str) -> Result<Reader<File>, error::CheckerError> {

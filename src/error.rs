@@ -12,4 +12,6 @@ pub enum CheckerError {
     IoError(csv::Error),
     #[error("CSV error caused by: `{0}`")]
     CsvError(#[from] csv::Error),
+    #[error("Printing graph failed due to lack of output file extension")]
+    GraphOutputFileError,
 }
