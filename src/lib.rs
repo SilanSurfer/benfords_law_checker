@@ -72,7 +72,7 @@ fn display_graph(occurence_map: HashMap<char, u64>, graph_name: String) -> Resul
         .build_cartesian_2d((1..9).into_segmented(), 0..max + 10)
         .unwrap();
 
-    ctx.configure_mesh().draw().unwrap();
+    ctx.configure_mesh().y_desc("Count").x_desc("Number").draw().unwrap();
 
     ctx.draw_series((1..).zip(sorted_vals.iter()).map(|(x, y)| {
         let x0 = SegmentValue::Exact(x);
