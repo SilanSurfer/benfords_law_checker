@@ -49,8 +49,9 @@ fn display_graph(
     info!("Saving plot in {}", &graph_name_path.display());
 
     let root_area = BitMapBackend::new(&graph_name_path, (600, 400)).into_drawing_area();
-    // TODO better error handling
-    root_area.fill(&WHITE).unwrap();
+    root_area.fill(&WHITE).map_err(|e| {
+        CheckerError::GraphPlotterDrawingError(format!("Root area creation failed: {}", e))
+    })?;
 
     let max: u64 = *occurence_map
         .values()
@@ -73,13 +74,17 @@ fn display_graph(
         .caption("Benford's Law", ("sans-serif", 40))
         // Added offset of 10, so that Y-axis looks nicer
         .build_cartesian_2d((1..9).into_segmented(), 0..max + 10)
-        .unwrap();
+        .map_err(|e| {
+            CheckerError::GraphPlotterDrawingError(format!("Chart creation failed: {}", e))
+        })?;
 
     ctx.configure_mesh()
         .y_desc("Count")
         .x_desc("Number")
         .draw()
-        .unwrap();
+        .map_err(|e| {
+            CheckerError::GraphPlotterDrawingError(format!("Chart configuration failed: {}", e))
+        })?;
 
     ctx.draw_series((1..).zip(sorted_vals.iter()).map(|(x, y)| {
         let x0 = SegmentValue::Exact(x);
@@ -88,7 +93,7 @@ fn display_graph(
         bar.set_margin(0, 0, 5, 5);
         bar
     }))
-    .unwrap();
+    .map_err(|e| CheckerError::GraphPlotterDrawingError(format!("Data drawing failed: {}", e)))?;
 
     Ok(())
 }

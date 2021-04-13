@@ -14,4 +14,6 @@ pub enum CheckerError {
     CsvError(#[from] csv::Error),
     #[error("Printing graph failed due to lack of output file extension")]
     GraphOutputFileError,
+    #[error("Graph plotter error caused by: `{0}`")]
+    GraphPlotterDrawingError(String),
 }
