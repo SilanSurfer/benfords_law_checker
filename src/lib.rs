@@ -6,6 +6,7 @@ use std::collections::HashMap;
 use std::fs::File;
 
 mod error;
+mod graph;
 
 pub fn run(input_file: &str, header: Option<String>, render_graph: Option<String>) {
     let mut reader = match read_file(input_file) {
@@ -39,7 +40,6 @@ fn display_graph(
     occurence_map: HashMap<char, u64>,
     graph_name: String,
 ) -> Result<(), error::CheckerError> {
-    use plotters::prelude::*;
     use std::path::Path;
 
     let graph_name_path = Path::new(&graph_name);
@@ -48,54 +48,27 @@ fn display_graph(
     }
     info!("Saving plot in {}", &graph_name_path.display());
 
-    let root_area = BitMapBackend::new(&graph_name_path, (600, 400)).into_drawing_area();
-    root_area.fill(&WHITE).map_err(|e| {
-        CheckerError::GraphPlotterDrawingError(format!("Root area creation failed: {}", e))
-    })?;
+    let sorted_vals = sort_values_by_digit_asc(occurence_map);
 
-    let max: u64 = *occurence_map
-        .values()
-        .max()
-        .expect("It shouldn't fail if not empty");
-    debug!("Occurence map:\n{:?}", &occurence_map);
+    debug!("Sorted vals:\n{:?}", sorted_vals);
 
-    let sorted_vals = occurence_map
+    let graph = graph::Graph::new(
+        graph_name_path,
+        String::from("Benford's Law"),
+        String::from("Number"),
+        String::from("Count"),
+    );
+
+    graph.draw(sorted_vals)
+}
+
+fn sort_values_by_digit_asc(occurence_map: HashMap<char, u64>) -> Vec<u64> {
+    occurence_map
         .into_iter()
         .collect::<BTreeMap<char, u64>>()
         .values()
         .cloned()
-        .collect::<Vec<u64>>();
-
-    debug!("Sorted vals:\n{:?}", sorted_vals);
-
-    let mut ctx = ChartBuilder::on(&root_area)
-        .set_label_area_size(LabelAreaPosition::Left, 40)
-        .set_label_area_size(LabelAreaPosition::Bottom, 40)
-        .caption("Benford's Law", ("sans-serif", 40))
-        // Added offset of 10, so that Y-axis looks nicer
-        .build_cartesian_2d((1..9).into_segmented(), 0..max + 10)
-        .map_err(|e| {
-            CheckerError::GraphPlotterDrawingError(format!("Chart creation failed: {}", e))
-        })?;
-
-    ctx.configure_mesh()
-        .y_desc("Count")
-        .x_desc("Number")
-        .draw()
-        .map_err(|e| {
-            CheckerError::GraphPlotterDrawingError(format!("Chart configuration failed: {}", e))
-        })?;
-
-    ctx.draw_series((1..).zip(sorted_vals.iter()).map(|(x, y)| {
-        let x0 = SegmentValue::Exact(x);
-        let x1 = SegmentValue::Exact(x + 1);
-        let mut bar = Rectangle::new([(x0, 0), (x1, *y)], RED.filled());
-        bar.set_margin(0, 0, 5, 5);
-        bar
-    }))
-    .map_err(|e| CheckerError::GraphPlotterDrawingError(format!("Data drawing failed: {}", e)))?;
-
-    Ok(())
+        .collect::<Vec<u64>>()
 }
 
 fn read_file(filename: &str) -> Result<Reader<File>, error::CheckerError> {
