@@ -1,12 +1,14 @@
 use csv::Reader;
+use error::CheckerError;
 use log::{debug, error, info, trace};
 use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::fs::File;
 
 mod error;
+mod graph;
 
-pub fn run(input_file: &str, header: Option<String>, render_graph: bool) {
+pub fn run(input_file: &str, header: Option<String>, render_graph: Option<String>) {
     let mut reader = match read_file(input_file) {
         Ok(reader) => reader,
         Err(e) => {
@@ -21,8 +23,52 @@ pub fn run(input_file: &str, header: Option<String>, render_graph: bool) {
     };
     info!(
         "Digit frequencies: {}",
-        display_digits_frequencies(occurence_map, render_graph)
+        display_digits_frequencies(&occurence_map)
     );
+
+    if render_graph.is_some() {
+        if let Err(e) = display_graph(
+            occurence_map,
+            render_graph.expect("We could safely assume here is some value"),
+        ) {
+            panic!("Error: {}", e);
+        }
+    }
+}
+
+fn display_graph(
+    occurence_map: HashMap<char, u64>,
+    graph_name: String,
+) -> Result<(), error::CheckerError> {
+    use std::path::Path;
+
+    let graph_name_path = Path::new(&graph_name);
+    if graph_name_path.extension().is_none() {
+        return Err(CheckerError::GraphOutputFileError);
+    }
+    info!("Saving plot in {}", &graph_name_path.display());
+
+    let sorted_vals = sort_values_by_digit_asc(occurence_map);
+
+    debug!("Sorted vals:\n{:?}", sorted_vals);
+
+    let graph = graph::Graph::new(
+        graph_name_path,
+        String::from("Benford's Law"),
+        String::from("Number"),
+        String::from("Count"),
+    );
+
+    graph.draw(sorted_vals)
+}
+
+fn sort_values_by_digit_asc(occurence_map: HashMap<char, u64>) -> Vec<u64> {
+    occurence_map
+        .into_iter()
+        .collect::<BTreeMap<char, u64>>()
+        .values()
+        .cloned()
+        .collect::<Vec<u64>>()
 }
 
 fn read_file(filename: &str) -> Result<Reader<File>, error::CheckerError> {
@@ -58,12 +104,12 @@ fn get_occurence_map(
     Ok(digit_freq_map)
 }
 
-fn display_digits_frequencies(occurence_map: HashMap<char, u64>, _graph: bool) -> String {
+fn display_digits_frequencies(occurence_map: &HashMap<char, u64>) -> String {
     debug!("Displaying digit frequencies");
     let total: u64 = occurence_map.values().sum();
     let freq_result: BTreeMap<char, f64> = occurence_map
-        .into_iter()
-        .map(|(digit, val)| (digit, val as f64 / total as f64))
+        .iter()
+        .map(|(digit, val)| (*digit, *val as f64 / total as f64))
         .collect();
     format!("{:.2?}", freq_result)
 }
@@ -158,7 +204,7 @@ mod tests {
         #[test]
         fn display_empty_result() {
             let digit_occurence_map = HashMap::new();
-            assert_eq!("{}", display_digits_frequencies(digit_occurence_map, false));
+            assert_eq!("{}", display_digits_frequencies(&digit_occurence_map));
         }
 
         #[test]
@@ -168,7 +214,7 @@ mod tests {
             digit_occurence_map.insert('2', 10);
             assert_eq!(
                 "{'1': 0.33, '2': 0.67}",
-                display_digits_frequencies(digit_occurence_map, true)
+                display_digits_frequencies(&digit_occurence_map)
             );
         }
     }

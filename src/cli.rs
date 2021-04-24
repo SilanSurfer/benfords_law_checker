@@ -16,7 +16,7 @@ pub struct CliArgs {
     /// -vv for trace
     #[structopt(short = "v", parse(from_occurrences))]
     pub verbose: u8,
-    /// Display graph with presentation of the results.
-    #[structopt(short, long)]
-    pub graph: bool,
+    /// Name of the file where graph will be saved.
+    #[structopt(short = "g", long)]
+    pub graph: Option<String>,
 }
