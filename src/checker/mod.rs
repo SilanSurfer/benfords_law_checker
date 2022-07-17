@@ -8,32 +8,26 @@ use std::fs::File;
 mod error;
 mod graph;
 
-pub fn run(input_file: &str, header: Option<String>, render_graph: Option<String>) {
-    let mut reader = match read_file(input_file) {
-        Ok(reader) => reader,
-        Err(e) => {
-            panic!("Error: {}", e);
-        }
-    };
-    let occurence_map = match get_occurence_map(&mut reader, header) {
-        Ok(occ_map) => occ_map,
-        Err(e) => {
-            panic!("Error: {}", e);
-        }
-    };
+pub fn run(
+    input_file: &str,
+    header: Option<String>,
+    render_graph: Option<String>,
+) -> Result<(), CheckerError> {
+    let mut reader = read_file(input_file)?;
+    let occurence_map = get_occurence_map(&mut reader, header)?;
     info!(
         "Digit frequencies: {}",
         display_digits_frequencies(&occurence_map)
     );
 
     if render_graph.is_some() {
-        if let Err(e) = display_graph(
+        display_graph(
             occurence_map,
             render_graph.expect("We could safely assume here is some value"),
-        ) {
-            panic!("Error: {}", e);
-        }
+        )?;
     }
+
+    Ok(())
 }
 
 fn display_graph(
@@ -151,7 +145,7 @@ fn update_occurence_in_map(digit: char, hash_map: &mut HashMap<char, u64>) -> u6
 #[cfg(test)]
 mod tests {
     mod get_first_digit_from {
-        use crate::get_first_digit_from;
+        use crate::checker::get_first_digit_from;
         use csv::StringRecord;
 
         #[test]
@@ -177,7 +171,7 @@ mod tests {
     }
 
     mod update_occurence_in_map {
-        use crate::update_occurence_in_map;
+        use crate::checker::update_occurence_in_map;
         use std::collections::HashMap;
 
         #[test]
@@ -198,7 +192,7 @@ mod tests {
     }
 
     mod display_digits_frequencies {
-        use crate::display_digits_frequencies;
+        use crate::checker::display_digits_frequencies;
         use std::collections::HashMap;
 
         #[test]

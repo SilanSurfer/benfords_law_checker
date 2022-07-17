@@ -1,4 +1,4 @@
-use crate::error::CheckerError;
+use crate::checker::error::CheckerError;
 use plotters::prelude::*;
 use std::path::Path;
 
