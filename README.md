@@ -12,16 +12,18 @@ Mathematically the probability that a digit is the first significant digit of a 
 P(d)=log10(1+1/d)
 
 The corresponding percentages are:
-x	P(x)
-1	0.301 (30.1%)
-2	0.176 (17.6%)
-3	0.125 (12.5%)
-4	0.097 (9.7%)
-5	0.079 (7.9%)
-6	0.067 (6.7%)
-7	0.058 (5.8%)
-8	0.051 (5.1%)
-9	0.046 (4.6%)
+| x |	P(x) |
+|---|----------|
+| 1	| 0.301 (30.1%) |
+| 2	| 0.176 (17.6%) |
+| 3	| 0.125 (12.5%) |
+| 4	| 0.097 (9.7%) |
+| 5	| 0.079 (7.9%) |
+| 6	| 0.067 (6.7%) |
+| 7	| 0.058 (5.8%) |
+| 8	| 0.051 (5.1%) |
+| 9	| 0.046 (4.6%) |
+
 A priori, any distribution of digits too much away from these numbers is not natural, thus abnormal.
 
 ## Usage
