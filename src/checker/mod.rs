@@ -2,7 +2,6 @@ use csv::Reader;
 use error::CheckerError;
 use log::{debug, error, info, trace};
 use std::collections::BTreeMap;
-use std::collections::HashMap;
 use std::fs::File;
 
 mod error;
@@ -20,18 +19,15 @@ pub fn run(
         display_digits_frequencies(&occurence_map)
     );
 
-    if render_graph.is_some() {
-        display_graph(
-            occurence_map,
-            render_graph.expect("We could safely assume here is some value"),
-        )?;
+    if let Some(graph_name) = render_graph {
+        display_graph(occurence_map, graph_name)?;
     }
 
     Ok(())
 }
 
 fn display_graph(
-    occurence_map: HashMap<char, u64>,
+    occurence_map: BTreeMap<char, u64>,
     graph_name: String,
 ) -> Result<(), error::CheckerError> {
     use std::path::Path;
@@ -56,13 +52,8 @@ fn display_graph(
     graph.draw(sorted_vals)
 }
 
-fn sort_values_by_digit_asc(occurence_map: HashMap<char, u64>) -> Vec<u64> {
-    occurence_map
-        .into_iter()
-        .collect::<BTreeMap<char, u64>>()
-        .values()
-        .cloned()
-        .collect::<Vec<u64>>()
+fn sort_values_by_digit_asc(occurence_map: BTreeMap<char, u64>) -> Vec<u64> {
+    occurence_map.values().cloned().collect::<Vec<u64>>()
 }
 
 fn read_file(filename: &str) -> Result<Reader<File>, error::CheckerError> {
@@ -73,13 +64,13 @@ fn read_file(filename: &str) -> Result<Reader<File>, error::CheckerError> {
 fn get_occurence_map(
     reader: &mut Reader<File>,
     input_header: Option<String>,
-) -> Result<HashMap<char, u64>, error::CheckerError> {
+) -> Result<BTreeMap<char, u64>, error::CheckerError> {
     debug!("Counting digit occurences");
     let mut header_index: usize = 1;
     if let Some(name) = input_header {
         header_index = get_header_index(reader, name)?;
     }
-    let mut digit_freq_map = HashMap::new();
+    let mut digit_freq_map = BTreeMap::new();
     if reader.records().next().is_none() {
         return Err(error::CheckerError::EmptySource);
     }
@@ -98,7 +89,7 @@ fn get_occurence_map(
     Ok(digit_freq_map)
 }
 
-fn display_digits_frequencies(occurence_map: &HashMap<char, u64>) -> String {
+fn display_digits_frequencies(occurence_map: &BTreeMap<char, u64>) -> String {
     debug!("Displaying digit frequencies");
     let total: u64 = occurence_map.values().sum();
     let freq_result: BTreeMap<char, f64> = occurence_map
@@ -135,7 +126,7 @@ fn get_first_digit_from(record: &csv::StringRecord, index: usize) -> Option<char
     }
 }
 
-fn update_occurence_in_map(digit: char, hash_map: &mut HashMap<char, u64>) -> u64 {
+fn update_occurence_in_map(digit: char, hash_map: &mut BTreeMap<char, u64>) -> u64 {
     let freq = hash_map.entry(digit).or_insert(0);
     *freq += 1;
     trace!("{} == {:?}", digit, *freq);
@@ -172,18 +163,18 @@ mod tests {
 
     mod update_occurence_in_map {
         use crate::checker::update_occurence_in_map;
-        use std::collections::HashMap;
+        use std::collections::BTreeMap;
 
         #[test]
         fn key_doesnt_exist_in_map() {
-            let mut digit_freq_map = HashMap::new();
+            let mut digit_freq_map = BTreeMap::new();
             assert_eq!(1, update_occurence_in_map('2', &mut digit_freq_map));
             assert_eq!(true, digit_freq_map.contains_key(&'2'));
             assert_eq!(Some(&1), digit_freq_map.get(&'2'));
         }
         #[test]
         fn key_exists_in_map() {
-            let mut digit_freq_map = HashMap::new();
+            let mut digit_freq_map = BTreeMap::new();
             digit_freq_map.insert('2', 1);
             assert_eq!(2, update_occurence_in_map('2', &mut digit_freq_map));
             assert_eq!(true, digit_freq_map.contains_key(&'2'));
@@ -193,17 +184,17 @@ mod tests {
 
     mod display_digits_frequencies {
         use crate::checker::display_digits_frequencies;
-        use std::collections::HashMap;
+        use std::collections::BTreeMap;
 
         #[test]
         fn display_empty_result() {
-            let digit_occurence_map = HashMap::new();
+            let digit_occurence_map: BTreeMap<char, u64> = BTreeMap::new();
             assert_eq!("{}", display_digits_frequencies(&digit_occurence_map));
         }
 
         #[test]
         fn display_normal_result() {
-            let mut digit_occurence_map = HashMap::new();
+            let mut digit_occurence_map = BTreeMap::new();
             digit_occurence_map.insert('1', 5);
             digit_occurence_map.insert('2', 10);
             assert_eq!(
