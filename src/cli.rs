@@ -1,22 +1,19 @@
-use structopt::StructOpt;
+use clap::Parser;
 
-#[derive(StructOpt)]
-#[structopt(
-    name = "Benford's Law Checker",
-    about = "Application checks if data follow Benford's Law"
-)]
+#[derive(Parser, Debug)]
+#[command(author, version, about = "Application checks if data follow Benford's Law", long_about = None)]
 pub struct CliArgs {
     /// The path to the file to read
     pub input_file_path: String,
     /// Name of the column's header that will be checked. By default the first column is used.
-    #[structopt(short = "i", long)]
+    #[arg(short, long)]
     pub input_header: Option<String>,
     /// Verbosity level
     /// -v for debug,
     /// -vv for trace
-    #[structopt(short = "v", parse(from_occurrences))]
+    #[arg(short, long, action = clap::ArgAction::Count)]
     pub verbose: u8,
     /// Name of the file where graph will be saved.
-    #[structopt(short = "g", long)]
+    #[arg(short, long)]
     pub graph: Option<String>,
 }

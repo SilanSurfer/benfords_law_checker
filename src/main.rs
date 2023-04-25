@@ -1,12 +1,12 @@
 use std::error::Error;
-use structopt::StructOpt;
-
+use clap::Parser;
+    
 mod checker;
 mod cli;
 mod logger;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let args = cli::CliArgs::from_args();
+    let args = cli::CliArgs::parse();
     logger::configure_logger(args.verbose);
 
     if let Err(e) = checker::run(&args.input_file_path, args.input_header, args.graph) {
