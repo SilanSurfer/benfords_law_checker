@@ -1,6 +1,6 @@
-use std::error::Error;
 use clap::Parser;
-    
+use std::error::Error;
+
 mod checker;
 mod cli;
 mod logger;
